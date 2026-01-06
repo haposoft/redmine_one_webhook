@@ -298,5 +298,13 @@ module RedmineWebhook
   end
 end
 
-# Note: Patch is applied in init.rb via Rails.configuration.to_prepare
-# Do NOT apply here to avoid MultipleIncludedBlocks error with Zeitwerk
+# Apply patch to TimeEntry model
+# Strategy: Try multiple approaches to ensure patch is applied
+Rails.application.config.after_initialize do
+  if defined?(TimeEntry)
+    unless TimeEntry.included_modules.include?(RedmineWebhook::TimeEntryPatch)
+      TimeEntry.include(RedmineWebhook::TimeEntryPatch)
+      Rails.logger.info "[Webhook] TimeEntryPatch applied in after_initialize"
+    end
+  end
+end
