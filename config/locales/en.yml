@@ -1,0 +1,4 @@
+# English strings go here for Rails i18n
+en:
+  # No custom translations needed - plugin uses global settings only
+  
