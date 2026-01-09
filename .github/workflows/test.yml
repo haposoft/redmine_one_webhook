@@ -1,0 +1,49 @@
+name: Test Redmine ONE Webhook Plugin
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    
+    strategy:
+      matrix:
+        database: ['sqlite3', 'mysql:8.0', 'postgres:14']
+        ruby-version: ['3.3', '3.4']
+        redmine-version: ['5.1', 'master']
+        exclude:
+          # Optimize CI time - only test with Ruby 3.4 for MySQL and PostgreSQL
+          - database: 'mysql:8.0'
+            ruby-version: '3.3'
+          - database: 'postgres:14'
+            ruby-version: '3.3'
+          # Reduce matrix further by testing master only with Ruby 3.4 and sqlite3
+          - redmine-version: 'master'
+            ruby-version: '3.3'
+          - redmine-version: 'master'
+            database: 'mysql:8.0'
+          - redmine-version: 'master'
+            database: 'postgres:14'
+    
+    steps:
+      - name: Setup Redmine
+        uses: hidakatsuya/action-setup-redmine@v3.0.1
+        with:
+          repository: 'redmine/redmine'
+          version: ${{ matrix.redmine-version }}
+          database: ${{ matrix.database }}
+          ruby-version: ${{ matrix.ruby-version }}
+      
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+        with:
+          path: plugins/redmine_one_webhook
+      
+      - name: Run plugin tests
+        run: |
+          bundle install
+          bin/rails redmine:plugins:test NAME=redmine_one_webhook RAILS_ENV=test

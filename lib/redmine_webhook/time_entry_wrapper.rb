@@ -61,7 +61,7 @@ module RedmineWebhook
 
     def custom_field_values_hash
       return [] unless @time_entry.custom_field_values
-      @time_entry.custom_field_values.collect do |value|
+      @time_entry.custom_field_values.select { |cfv| cfv.value.present? && cfv.value.to_s != '0' }.collect do |value|
         RedmineWebhook::CustomFieldValueWrapper.new(value).to_hash
       end
     end

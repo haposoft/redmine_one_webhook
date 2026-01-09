@@ -5,6 +5,11 @@ require 'openssl'
 
 module RedmineWebhook
   class WebhookListener < Redmine::Hook::Listener
+    # Make new public for testing (Redmine::Hook::Listener makes new private by default)
+    def self.new(*args)
+      super
+    end
+    
     # Configurable overtime activity names (case-insensitive)
     OVERTIME_ACTIVITIES = ['overtime', 'ot'].freeze
 
@@ -198,7 +203,7 @@ module RedmineWebhook
 
       time_entry.custom_field_values.each do |cfv|
         field_name = cfv.custom_field.name.to_s.downcase.strip
-        if field_names.any? { |fn| field_name.include?(fn) }
+        if field_names.any? { |fn| field_name.include?(fn.to_s.downcase) }
           return cfv.value
         end
       end

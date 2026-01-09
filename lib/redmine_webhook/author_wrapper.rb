@@ -21,11 +21,8 @@ module RedmineWebhook
     end
 
     def icon_url
-      if @author.mail.blank?
-        icon_url = nil
-      else
-        icon_url = gravatar_url(@author.mail)
-      end
+      return nil if @author.mail.blank?
+      gravatar_url(@author.mail)
     end
   end
 end
